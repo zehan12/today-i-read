@@ -6,4 +6,7 @@
 
 ##### 2. [React JS Architecture: Implementation & Best Practices in 2024](https://www.upgrad.com/blog/react-js-architecture/)
 
+## January 8, 2025
+
+##### 1. [Build a SolidJS app with Deno](https://deno.com/blog/build-solidjs-with-deno)
 
