@@ -10,3 +10,7 @@
 
 ##### 1. [Build a SolidJS app with Deno](https://deno.com/blog/build-solidjs-with-deno)
 
+## January 14, 2025
+
+##### 1. [sequential vs concurrent vs parallel](https://dev.to/aliadelnour/sequential-vs-concurrent-vs-parallel-14j6)
+
