@@ -13,4 +13,4 @@
 ## January 14, 2025
 
 ##### 1. [sequential vs concurrent vs parallel](https://dev.to/aliadelnour/sequential-vs-concurrent-vs-parallel-14j6)
-
+##### 2. [Master React By Following The Best In The Industry.😊](https://dorendev.hashnode.dev/master-react-by-following-the-best-in-the-industry?ref=dailydev)
