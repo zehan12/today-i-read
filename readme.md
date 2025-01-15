@@ -14,3 +14,6 @@
 
 ##### 1. [sequential vs concurrent vs parallel](https://dev.to/aliadelnour/sequential-vs-concurrent-vs-parallel-14j6)
 ##### 2. [Master React By Following The Best In The Industry.😊](https://dorendev.hashnode.dev/master-react-by-following-the-best-in-the-industry?ref=dailydev)
+
+## January 15, 2025
+##### 1. [Learning React: 5 Important Principles About Hooks You Have To Know](https://code.likeagirl.io/learning-react-5-important-principles-about-hooks-you-have-to-know-4967cd9d4eb4)
