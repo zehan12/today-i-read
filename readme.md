@@ -18,3 +18,6 @@
 ## January 15, 2025
 ##### 1. [Learning React: 5 Important Principles About Hooks You Have To Know](https://code.likeagirl.io/learning-react-5-important-principles-about-hooks-you-have-to-know-4967cd9d4eb4)
 ##### 2. [Migrating from Create React App to Vite: A Step-by-Step Guide](https://dev.to/manojspace/migrating-from-create-react-app-to-vite-a-step-by-step-guide-2cab)
+
+## February 8, 2025
+##### 1. [You don’t Need a Book to Know DDD(Domain-Driven Design)](https://freedium.cfd/https://towardsdev.com/you-dont-need-a-book-to-know-ddd-30cd036843bc)
