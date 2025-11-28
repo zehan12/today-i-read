@@ -1,118 +1,160 @@
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  Zap,
-  Server,
-  Route as RouteIcon,
-  Shield,
-  Waves,
-  Sparkles,
-} from 'lucide-react'
+import { useState } from 'react'
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { client as orpcClient } from '@/orpc/client'
+import ArticleList from '@/components/ArticleList'
+import ArticleForm from '@/components/ArticleForm'
+import DateFilter from '@/components/DateFilter'
 
 export const Route = createFileRoute('/')({ component: App })
 
+interface Article {
+  id: number
+  title: string
+  url: string | null
+  source: string | null
+  readAt: Date
+  notes: string | null
+}
+
 function App() {
-  const features = [
-    {
-      icon: <Zap className="w-12 h-12 text-cyan-400" />,
-      title: 'Powerful Server Functions',
-      description:
-        'Write server-side code that seamlessly integrates with your client components. Type-safe, secure, and simple.',
+  const [showForm, setShowForm] = useState(false)
+  const [editingArticle, setEditingArticle] = useState<Article | undefined>()
+  const [dateFilter, setDateFilter] = useState<{
+    startDate?: string
+    endDate?: string
+  }>({})
+
+  const queryClient = useQueryClient()
+
+  // Fetch articles with optional date filtering
+  const { data: articles = [], isLoading } = useQuery({
+    queryKey: ['articles', dateFilter],
+    queryFn: async () => {
+      const result = await orpcClient.getArticles(dateFilter)
+      return result as Article[]
     },
-    {
-      icon: <Server className="w-12 h-12 text-cyan-400" />,
-      title: 'Flexible Server Side Rendering',
-      description:
-        'Full-document SSR, streaming, and progressive enhancement out of the box. Control exactly what renders where.',
+  })
+
+  // Create article mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: {
+      title: string
+      url?: string
+      source?: string
+      readAt: string
+      notes?: string
+    }) => {
+      return await orpcClient.createArticle(data)
     },
-    {
-      icon: <RouteIcon className="w-12 h-12 text-cyan-400" />,
-      title: 'API Routes',
-      description:
-        'Build type-safe API endpoints alongside your application. No separate backend needed.',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] })
+      setShowForm(false)
     },
-    {
-      icon: <Shield className="w-12 h-12 text-cyan-400" />,
-      title: 'Strongly Typed Everything',
-      description:
-        'End-to-end type safety from server to client. Catch errors before they reach production.',
+  })
+
+  // Update article mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: {
+      id: number
+      title?: string
+      url?: string
+      source?: string
+      readAt?: string
+      notes?: string
+    }) => {
+      return await orpcClient.updateArticle(data)
     },
-    {
-      icon: <Waves className="w-12 h-12 text-cyan-400" />,
-      title: 'Full Streaming Support',
-      description:
-        'Stream data from server to client progressively. Perfect for AI applications and real-time updates.',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] })
+      setEditingArticle(undefined)
     },
-    {
-      icon: <Sparkles className="w-12 h-12 text-cyan-400" />,
-      title: 'Next Generation Ready',
-      description:
-        'Built from the ground up for modern web applications. Deploy anywhere JavaScript runs.',
+  })
+
+  // Delete article mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await orpcClient.deleteArticle({ id })
     },
-  ]
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] })
+    },
+  })
+
+  const handleAddArticle = () => {
+    setEditingArticle(undefined)
+    setShowForm(true)
+  }
+
+  const handleEditArticle = (article: Article) => {
+    setEditingArticle(article)
+    setShowForm(true)
+  }
+
+  const handleDeleteArticle = (id: number) => {
+    deleteMutation.mutate(id)
+  }
+
+  const handleFormSubmit = (data: {
+    title: string
+    url?: string
+    source?: string
+    readAt: string
+    notes?: string
+  }) => {
+    if (editingArticle) {
+      updateMutation.mutate({ id: editingArticle.id, ...data })
+    } else {
+      createMutation.mutate(data)
+    }
+  }
+
+  const handleFormCancel = () => {
+    setShowForm(false)
+    setEditingArticle(undefined)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <section className="relative py-20 px-6 text-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10"></div>
-        <div className="relative max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <img
-              src="/tanstack-circle-logo.png"
-              alt="TanStack Logo"
-              className="w-24 h-24 md:w-32 md:h-32"
-            />
-            <h1 className="text-6xl md:text-7xl font-black text-white [letter-spacing:-0.08em]">
-              <span className="text-gray-300">TANSTACK</span>{' '}
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                START
-              </span>
-            </h1>
-          </div>
-          <p className="text-2xl md:text-3xl text-gray-300 mb-4 font-light">
-            The framework for next generation AI applications
-          </p>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-8">
-            Full-stack framework powered by TanStack Router for React and Solid.
-            Build modern applications with server functions, streaming, and type
-            safety.
-          </p>
-          <div className="flex flex-col items-center gap-4">
-            <a
-              href="https://tanstack.com/start"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-cyan-500/50"
-            >
-              Documentation
-            </a>
-            <p className="text-gray-400 text-sm mt-2">
-              Begin your TanStack Start journey by editing{' '}
-              <code className="px-2 py-1 bg-slate-700 rounded text-cyan-400">
-                /src/routes/index.tsx
-              </code>
-            </p>
-          </div>
+    <div className="min-h-screen p-6 md:p-12 max-w-xl mx-auto">
+      <header className="mb-12">
+        <h1 className="text-4xl font-mono! mb-4 text-[#f2f2f2]">Today I Read</h1>
+        <p className="text-lg text-gray-400 mb-6 leading-relaxed">
+          Track your daily reading journey. Save articles, add notes, and build your knowledge library.
+        </p>
+        <div className="flex gap-4">
+          <button
+            onClick={handleAddArticle}
+            className="text-[#f2f2f2] underline hover:no-underline"
+          >
+            Add Article
+          </button>
         </div>
-      </section>
+      </header>
 
-      <section className="py-16 px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10"
-            >
-              <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-gray-400 leading-relaxed">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Main Content */}
+      <div className="space-y-8">
+        {/* Date Filter */}
+        <DateFilter onFilterChange={setDateFilter} />
+
+        {/* Articles List */}
+        <ArticleList
+          articles={articles}
+          isLoading={isLoading}
+          onEdit={handleEditArticle}
+          onDelete={handleDeleteArticle}
+        />
+      </div>
+
+      {/* Article Form Modal */}
+      {showForm && (
+        <ArticleForm
+          article={editingArticle}
+          onSubmit={handleFormSubmit}
+          onCancel={handleFormCancel}
+        />
+      )}
     </div>
   )
 }
+
