@@ -1,28 +1,28 @@
-import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core'
-import { sql } from 'drizzle-orm'
+import mongoose, { Schema, type Document } from 'mongoose'
 
-export const todos = sqliteTable('todos', {
-  id: integer('id', { mode: 'number' }).primaryKey({
-    autoIncrement: true,
-  }),
-  title: text('title').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`,
-  ),
-})
+export interface IArticle extends Document {
+  title: string
+  url?: string
+  source?: string
+  readAt: Date
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+}
 
-export const articles = sqliteTable('articles', {
-  id: integer('id', { mode: 'number' }).primaryKey({
-    autoIncrement: true,
-  }),
-  title: text('title').notNull(),
-  url: text('url'),
-  source: text('source'),
-  readAt: integer('read_at', { mode: 'timestamp' })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  notes: text('notes'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .default(sql`(unixepoch())`),
-})
+const ArticleSchema = new Schema<IArticle>(
+  {
+    title: { type: String, required: true },
+    url: { type: String },
+    source: { type: String },
+    readAt: { type: Date, required: true, default: Date.now },
+    notes: { type: String },
+  },
+  {
+    timestamps: true,
+  }
+)
+
+// Prevent overwriting the model if it's already compiled
+export const Article = mongoose.models.Article || mongoose.model<IArticle>('Article', ArticleSchema)
+

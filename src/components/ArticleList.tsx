@@ -2,7 +2,7 @@ import ArticleCard from './ArticleCard'
 import { BookOpen } from 'lucide-react'
 
 interface Article {
-  id: number
+  id: string
   title: string
   url: string | null
   source: string | null
@@ -14,7 +14,7 @@ interface ArticleListProps {
   articles: Article[]
   isLoading?: boolean
   onEdit: (article: Article) => void
-  onDelete: (id: number) => void
+  onDelete: (id: string) => void
 }
 
 export default function ArticleList({

@@ -1,8 +1,7 @@
 import { os } from '@orpc/server'
 import * as z from 'zod'
 import { db } from '@/db'
-import { articles } from '@/db/schema'
-import { eq, desc, gte, lte, and } from 'drizzle-orm'
+import { Article } from '@/db/schema'
 
 // Schema for creating an article
 const createArticleSchema = z.object({
@@ -15,7 +14,7 @@ const createArticleSchema = z.object({
 
 // Schema for updating an article
 const updateArticleSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   title: z.string().min(1, 'Title is required').optional(),
   url: z.string().url().optional().or(z.literal('')),
   source: z.string().optional(),
@@ -33,30 +32,39 @@ const filterArticlesSchema = z.object({
 export const getArticles = os
   .input(filterArticlesSchema)
   .handler(async ({ input }) => {
-    const conditions = []
+    await db.connect()
 
-    if (input.startDate) {
-      conditions.push(gte(articles.readAt, new Date(input.startDate)))
+    const query: any = {}
+
+    if (input.startDate || input.endDate) {
+      query.readAt = {}
+      if (input.startDate) {
+        query.readAt.$gte = new Date(input.startDate)
+      }
+      if (input.endDate) {
+        query.readAt.$lte = new Date(input.endDate)
+      }
     }
-    if (input.endDate) {
-      conditions.push(lte(articles.readAt, new Date(input.endDate)))
-    }
 
-    const result = await db
-      .select()
-      .from(articles)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(articles.readAt))
+    const articles = await Article.find(query).sort({ readAt: -1 })
 
-    return result
+    return articles.map(article => ({
+      id: article._id.toString(),
+      title: article.title,
+      url: article.url,
+      source: article.source,
+      readAt: article.readAt,
+      notes: article.notes,
+      createdAt: article.createdAt,
+      updatedAt: article.updatedAt
+    }))
   })
 
 // Get articles grouped by date
 export const getArticlesByDate = os.input(z.object({})).handler(async () => {
-  const allArticles = await db
-    .select()
-    .from(articles)
-    .orderBy(desc(articles.readAt))
+  await db.connect()
+  
+  const allArticles = await Article.find().sort({ readAt: -1 })
 
   // Group articles by date (YYYY-MM-DD)
   const grouped = allArticles.reduce(
@@ -67,10 +75,20 @@ export const getArticlesByDate = os.input(z.object({})).handler(async () => {
       if (!acc[dateKey]) {
         acc[dateKey] = []
       }
-      acc[dateKey].push(article)
+      
+      acc[dateKey].push({
+        id: article._id.toString(),
+        title: article.title,
+        url: article.url,
+        source: article.source,
+        readAt: article.readAt,
+        notes: article.notes,
+        createdAt: article.createdAt,
+        updatedAt: article.updatedAt
+      })
       return acc
     },
-    {} as Record<string, typeof allArticles>,
+    {} as Record<string, any[]>,
   )
 
   return grouped
@@ -80,48 +98,73 @@ export const getArticlesByDate = os.input(z.object({})).handler(async () => {
 export const createArticle = os
   .input(createArticleSchema)
   .handler(async ({ input }) => {
-    const result = await db
-      .insert(articles)
-      .values({
-        title: input.title,
-        url: input.url || null,
-        source: input.source || null,
-        readAt: input.readAt ? new Date(input.readAt) : new Date(),
-        notes: input.notes || null,
-      })
-      .returning()
+    await db.connect()
 
-    return result[0]
+    const newArticle = await Article.create({
+      title: input.title,
+      url: input.url || undefined,
+      source: input.source || undefined,
+      readAt: input.readAt ? new Date(input.readAt) : new Date(),
+      notes: input.notes || undefined,
+    })
+
+    return {
+      id: newArticle._id.toString(),
+      title: newArticle.title,
+      url: newArticle.url,
+      source: newArticle.source,
+      readAt: newArticle.readAt,
+      notes: newArticle.notes,
+      createdAt: newArticle.createdAt,
+      updatedAt: newArticle.updatedAt
+    }
   })
 
 // Update an existing article
 export const updateArticle = os
   .input(updateArticleSchema)
   .handler(async ({ input }) => {
+    await db.connect()
+    
     const { id, ...updates } = input
 
-    const updateData: Record<string, any> = {}
+    const updateData: any = {}
     
     if (updates.title) updateData.title = updates.title
-    if (updates.url !== undefined) updateData.url = updates.url || null
-    if (updates.source !== undefined) updateData.source = updates.source || null
+    if (updates.url !== undefined) updateData.url = updates.url || undefined
+    if (updates.source !== undefined) updateData.source = updates.source || undefined
     if (updates.readAt) updateData.readAt = new Date(updates.readAt)
-    if (updates.notes !== undefined) updateData.notes = updates.notes || null
+    if (updates.notes !== undefined) updateData.notes = updates.notes || undefined
 
-    const result = await db
-      .update(articles)
-      .set(updateData)
-      .where(eq(articles.id, id))
-      .returning()
+    const updatedArticle = await Article.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    )
 
-    return result[0]
+    if (!updatedArticle) {
+      throw new Error('Article not found')
+    }
+
+    return {
+      id: updatedArticle._id.toString(),
+      title: updatedArticle.title,
+      url: updatedArticle.url,
+      source: updatedArticle.source,
+      readAt: updatedArticle.readAt,
+      notes: updatedArticle.notes,
+      createdAt: updatedArticle.createdAt,
+      updatedAt: updatedArticle.updatedAt
+    }
   })
 
 // Delete an article
 export const deleteArticle = os
-  .input(z.object({ id: z.number() }))
+  .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
-    await db.delete(articles).where(eq(articles.id, input.id))
+    await db.connect()
+    await Article.findByIdAndDelete(input.id)
     return { success: true }
   })
+
 

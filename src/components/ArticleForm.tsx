@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 
 interface ArticleFormProps {
   article?: {
-    id: number
+    id: string
     title: string
     url: string | null
     source: string | null

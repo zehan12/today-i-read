@@ -2,7 +2,7 @@
 
 interface ArticleCardProps {
   article: {
-    id: number
+    id: string
     title: string
     url: string | null
     source: string | null
@@ -10,7 +10,7 @@ interface ArticleCardProps {
     notes: string | null
   }
   onEdit: (article: ArticleCardProps['article']) => void
-  onDelete: (id: number) => void
+  onDelete: (id: string) => void
 }
 
 export default function ArticleCard({

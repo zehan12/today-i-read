@@ -15,7 +15,8 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
-    "readme": "tsx scripts/generate-readme.ts"
+    "readme": "tsx scripts/generate-readme.ts",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@orpc/client": "^1.7.5",
@@ -36,12 +37,10 @@
     "@tanstack/react-router-ssr-query": "^1.131.7",
     "@tanstack/react-start": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
-    "better-sqlite3": "^12.4.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "drizzle-kit": "^0.30.0",
-    "drizzle-orm": "^0.39.0",
     "lucide-react": "^0.544.0",
+    "mongoose": "^9.0.0",
     "nitro": "latest",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

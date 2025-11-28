@@ -10,7 +10,7 @@ import DateFilter from '@/components/DateFilter'
 export const Route = createFileRoute('/')({ component: App })
 
 interface Article {
-  id: number
+  id: string
   title: string
   url: string | null
   source: string | null
@@ -57,7 +57,7 @@ function App() {
   // Update article mutation
   const updateMutation = useMutation({
     mutationFn: async (data: {
-      id: number
+      id: string
       title?: string
       url?: string
       source?: string
@@ -74,7 +74,7 @@ function App() {
 
   // Delete article mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       return await orpcClient.deleteArticle({ id })
     },
     onSuccess: () => {
@@ -92,7 +92,7 @@ function App() {
     setShowForm(true)
   }
 
-  const handleDeleteArticle = (id: number) => {
+  const handleDeleteArticle = (id: string) => {
     deleteMutation.mutate(id)
   }
 

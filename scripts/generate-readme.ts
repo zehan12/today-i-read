@@ -1,20 +1,19 @@
 
 import { db } from '../src/db/index';
-import { articles } from '../src/db/schema';
-import { desc } from 'drizzle-orm';
+import { Article } from '../src/db/schema';
 import fs from 'node:fs';
 import path from 'node:path';
 
 async function generateReadme() {
+  console.log('Connecting to database...');
+  await db.connect();
+
   console.log('Fetching articles...');
-  const allArticles = await db
-    .select()
-    .from(articles)
-    .orderBy(desc(articles.readAt));
+  const allArticles = await Article.find().sort({ readAt: -1 });
 
   console.log(`Found ${allArticles.length} articles.`);
 
-  const grouped: Record<string, typeof allArticles> = {};
+  const grouped: Record<string, any[]> = {};
 
   // Group by "Month Day, Year"
   for (const article of allArticles) {
