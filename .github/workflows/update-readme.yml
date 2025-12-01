@@ -13,29 +13,20 @@ jobs:
       contents: write # Required to push changes
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # --- Use pnpm setup for a clean workflow ---
-      - name: Setup Node.js and pnpm
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm' # Cache should match the package manager used (pnpm)
-      
-      - name: Install pnpm
-        run: npm install -g pnpm # Ensure pnpm is globally available if setup-node doesn't provide it
+        # Crucial: Use the cache key for pnpm
+          cache: 'pnpm' 
+  
+      - name: Install pnpm globally
+      # Some environments still need this step explicitly
+        run: npm install -g pnpm 
 
       - name: Install dependencies
-        # Use pnpm install instead of npm ci if pnpm is the chosen manager
-        run: pnpm install --frozen-lockfile 
-        # Note: --frozen-lockfile is the pnpm equivalent of npm ci
-
-      - name: Generate README
-        run: pnpm readme # Use pnpm run for consistency
-        env:
-          # Only define the DATABASE_URL needed for this specific script
-          DATABASE_URL: dev.db 
+      # Now pnpm is guaranteed to be in the PATH
+        run: pnpm install --frozen-lockfile
 
       - name: Commit and Push changes
         run: |
