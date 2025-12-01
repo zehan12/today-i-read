@@ -19,18 +19,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: npm/action-setup@v3
         with:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm ci
 
       - name: Generate README
-        run: pnpm readme
+        run: npm readme
         env:
           DATABASE_URL: dev.db # Ensure script knows where to look
 
