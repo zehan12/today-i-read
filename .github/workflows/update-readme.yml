@@ -13,20 +13,22 @@ jobs:
       contents: write # Required to push changes
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-        # Crucial: Use the cache key for pnpm
-          cache: 'pnpm' 
-  
-      - name: Install pnpm globally
-      # Some environments still need this step explicitly
-        run: npm install -g pnpm 
+          cache: 'npm'
 
       - name: Install dependencies
-      # Now pnpm is guaranteed to be in the PATH
-        run: pnpm install --frozen-lockfile
+        run: npm ci
+
+      - name: Generate README
+        run: npm run readme
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
       - name: Commit and Push changes
         run: |

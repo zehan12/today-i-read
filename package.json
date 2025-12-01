@@ -10,11 +10,7 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:pull": "drizzle-kit pull",
-    "db:studio": "drizzle-kit studio",
+
     "readme": "tsx scripts/generate-readme.ts",
     "start": "node .output/server/index.mjs"
   },
@@ -55,7 +51,7 @@
     "@tanstack/devtools-vite": "^0.3.11",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
-    "@types/better-sqlite3": "^7.6.0",
+
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
